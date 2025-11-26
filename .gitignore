@@ -1,5 +1,24 @@
+# Files
+*.pyc
+*.cpython-310.pyc
+*screenlog.0
+*.egg-info
+*.zip
+*.pkl
+*.0
 .cache
-public
 yarn.lock
 package-lock.json
+
+# Folders
+sand_gym/datasets/*
+sand_gym/wandb
+sand_gym/trained_models/*
+sand_gym/tensorboard_logs/*
+sand_gym/evaluation/*
+public
 node_modules
+
+# VSCode
+.vscode
+*.code-workspace

@@ -1,0 +1,92 @@
+<mujoco model="sand_shaping_arena">
+  <asset>
+    <texture builtin="gradient" height="256" rgb1=".9 .9 1." rgb2=".2 .3 .4" type="skybox" width="256"/>
+    <texture file="../textures/hospital_floor.png" type="2d" name="texplane"/>
+    <material name="floorplane" reflectance="0.0" shininess="0.1" specular="0.1" texrepeat="2 2" texture="texplane" texuniform="true"/>
+    
+    <texture file="../textures/light-wood.png" name="woodplane" type="2d" />
+    <material name="table_wood" reflectance="0.0" shininess="0.1" specular="0.1" texrepeat="1 1" texture="woodplane" texuniform="false" />
+    <!-- steel legs -->
+    <texture file="../textures/steel-brushed.png" type="cube" name="tex-steel-brushed"/>
+    <material name="table_legs_metal" reflectance="0.8" shininess="0.8" texrepeat="1 1" texture="tex-steel-brushed" />
+    <!-- plaster walls -->
+    <texture file="../textures/hospital_wall.png" type="2d" name="tex-hospital-wall"/>
+    <material name="walls_mat" reflectance="0.0" shininess="0.1" specular="0.1" texrepeat="1 1" texture="tex-hospital-wall" texuniform="false" />
+    <!-- added table texture and material for domain randomization -->
+    <texture  name="textable" builtin="flat" height="512" width="512" rgb1="0.5 0.5 0.5" rgb2="0.5 0.5 0.5"/>
+    <material name="table_mat" texture="textable" />
+
+    <!--sand texture -->
+    <material name="mug" specular="1" shininess="1" rgba="1.0 0.69 0.31 1"/>
+    <texture file="../textures/cream-plaster.png" name="tex-cream-plaster" type="2d" />
+    <material name="sand_box_plaster" reflectance="0.0" shininess="0.1" specular="0.1" texrepeat="3 3" texture="tex-cream-plaster" texuniform="true" />
+    
+    <hfield name="sand" nrow="32" ncol="32" size="0.16 0.16 0.2 0.01"/>
+  </asset>
+  <worldbody>
+    <!-- Floor -->
+    <geom condim="3" conaffinity="0" contype="0" group="1" material="floorplane" name="floor" pos="0 0 0" size="3 3 .125" type="plane"/>
+    <!-- Walls (visual only) -->
+    <geom pos="-1.25 2.25 1.5" quat="0.6532815 0.6532815 0.2705981 0.2705981" size="1.06 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_leftcorner_visual" material="walls_mat"/>
+    <geom pos="-1.25 -2.25 1.5" quat="0.6532815 0.6532815 -0.2705981 -0.2705981" size="1.06 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_rightcorner_visual" material="walls_mat"/>
+    <geom pos="1.25 3 1.5" quat="0.7071 0.7071 0 0" size="1.75 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_left_visual" material="walls_mat"/>
+    <geom pos="1.25 -3 1.5" quat="-0.7071 -0.7071 0 0" size="1.75 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_right_visual" material="walls_mat"/>
+    <geom pos="-2 0 1.5" quat="0.5 0.5 0.5 0.5" size="1.5 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_rear_visual" material="walls_mat"/>
+    <geom pos="3 0 1.5" quat="0.5 0.5 -0.5 -0.5" size="3 1.5 0.01" type="box" conaffinity="0" contype="0" group="1" name="wall_front_visual" material="walls_mat"/>
+    <!-- Table body -->
+    <body name="table" pos="0 0 0.4">
+      <geom pos="0 0 0" size="0.4 0.4 0.4" type="box" name="table_collision" friction="1 0.005 0.0001"/>
+      <geom pos="0 0 0" size="0.4 0.4 0.4" type="box" conaffinity="0" contype="0" group="1" name="table_visual" material="table_wood"/>
+      <site pos="0 0 0.4" name="table_top" size="0.001 0.001 0.001" rgba="0 0 0 0"/>
+      <!-- Legs (visual only) -->
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg1_visual" material="table_legs_metal"/>
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg2_visual" material="table_legs_metal"/>
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg3_visual" material="table_legs_metal"/>
+      <geom pos="0 0 0" size="0.05 0.1" type="cylinder" conaffinity="0" contype="0" group="1" name="table_leg4_visual" material="table_legs_metal"/>
+    </body>
+    <!-- Sand box body -->
+    <body name="sand_box_walls" quat="0.7071 0 0 0.7071" pos="0 0 0.72">
+      <!-- Bottom Plate -->
+      <geom name="tray_bottom_vis" conaffinity="0" contype="0" group="1" type="box" pos="0 0 0.005" size="0.31 0.16 0.005" material="sand_box_plaster"/>
+      <geom name="tray_bottom_col" type="box" pos="0 0 0.005" size="0.31 0.16 0.005" material="sand_box_plaster"/>
+      <!-- Walls -->
+      <!-- Front Wall -->
+      <geom name="tray_front_vis" conaffinity="0" contype="0" group="1" type="box" pos="0 0.155 0.055" size="0.31 0.005 0.045" material="sand_box_plaster"/>
+      <geom name="tray_front_col" type="box" pos="0 0.155 0.055" size="0.31 0.005 0.045" material="sand_box_plaster"/>
+      <!-- Back Wall -->
+      <geom name="tray_back_vis" conaffinity="0" contype="0" group="1" type="box" pos="0 -0.155 0.055" size="0.31 0.005 0.045" material="sand_box_plaster"/>
+      <geom name="tray_back_col" type="box" pos="0 -0.155 0.055" size="0.31 0.005 0.045" material="sand_box_plaster"/>
+      <!-- Left Wall -->
+      <geom name="tray_left_vis" conaffinity="0" contype="0" group="1" type="box" pos="-0.305 0 0.055" size="0.005 0.15 0.045" material="sand_box_plaster"/>
+      <geom name="tray_left_col" type="box" pos="-0.305 0 0.055" size="0.005 0.15 0.045" material="sand_box_plaster"/>
+      <!-- Right Wall -->
+      <geom name="tray_right_vis" conaffinity="0" contype="0" group="1" type="box" pos="0.305 0 0.055" size="0.005 0.15 0.045" material="sand_box_plaster"/>
+      <geom name="tray_right_col" type="box" pos="0.305 0 0.055" size="0.005 0.15 0.045" material="sand_box_plaster"/>
+    </body>
+    <!-- Sand -->
+    <body name="sand_box" pos="0 0 0.73">
+    <geom name="sand_box_vis" contype="0" conaffinity="0" group="1" type="hfield" hfield="sand" pos="0 0 0" material="mug" />
+    </body>
+    
+    <light name="light1" diffuse=".8 .8 .8" dir="0 -.15 -1" directional="false" pos="1 1 4.0" specular="0.3 0.3 0.3" castshadow="false"/>
+    <light name="light2" diffuse=".8 .8 .8" dir="0 -.15 -1" directional="false" pos="-3. -3. 4.0" specular="0.3 0.3 0.3" castshadow="false"/>
+    <!-- front view -->
+    <camera mode="fixed" name="frontview" pos="2.15 0 1.45" quat="0.56 0.43 0.43 0.56"/>
+    <!-- front view 2 -->
+    <camera mode="fixed" name="frontview2" pos="2.15 0 1.45" quat="0.56 0.43 0.43 0.56" fovy="60"/>
+    <!-- bird view -->
+    <camera mode="fixed" name="birdview" pos="0.35 0 3.0" quat="0.7071 0 0 0.7071"/>
+    <!-- agent view -->
+    <camera mode="fixed" name="agentview" pos="1.05 0 1.35" quat="0.653 0.271 0.271 0.653"/>
+    <!-- Eval view -->
+    <camera mode="fixed" name="evalfrontview" pos="0.82 0.0 1.05" quat="0.631431466342813219 0.318267659859063634 0.318267659859063690 0.631431466342813330" fovy="58"/>
+    <!-- Quadratic close with wrist-->
+    <camera mode="fixed" name="evalsideview" fovy="58" pos="0.55 -0.4 1.175" quat="0.9044552445411682 0.4265686273574829 -0.0 -0.0" />
+    <!-- fovy = vertical depth field of view of ZED2i -->
+    <camera name="right" mode="fixed" fovy="70" pos="0.619 0.509 1.157" quat="-0.008 -0.003 0.363 0.932" />
+    <camera name="right_eval" mode="fixed" fovy="60" pos="0.619 0.509 1.157" quat="0.0 0.0 0.3631 0.9318" />
+    <!-- side view 2-->
+    <!-- fovy = vertical depth field of view of Realsense D435 -->
+    <camera name="left" mode="fixed" fovy="58" pos="0.55 -0.41 1.03" quat="-0.892978943411137038 -0.450098441037434960 0.000000000000000028 0.000000000000000055" />
+  </worldbody>
+</mujoco>

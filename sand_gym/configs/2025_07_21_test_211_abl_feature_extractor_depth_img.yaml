@@ -1,0 +1,214 @@
+######################################################################
+# Training settings
+######################################################################
+seed: 7
+
+# Settings for stable-baselines RL algorithm
+sb_config:
+  total_iterations: &total_iterations 6e6 # [iterations] total_iterations%num_cpu has to be 0
+  buffer_size: 1e3 # [iterations]
+  fill_buffer_at_start: 1000 # [iterations]
+  learning_rate: 0.0003 # 1e-3 [float]
+  action_noise_sigma: 0.2 # [float]
+
+sb_policy:
+  type: "MultiInputPolicy"
+  rl_algo: "TQC"
+  # TQC original
+  tqc:
+    batch_size: 256
+    tau: 0.005
+    gamma: 0.99
+    train_freq: [1, "step"]
+    top_quantiles_to_drop_per_net: 2
+    gradient_steps: 1
+    policy_kwargs:
+      n_critics: 2
+      activation_fn: "ReLU"
+      net_arch: [512, 256, 128]
+
+  features_extractor_class: "CNNFeatureExtractorWithMasksAndImage"
+  features_extractor_kwargs:
+    features_dim: 256 # [int]
+
+# Policy settings
+sb_callbacks:
+  # Tensorboard callback
+  tensorboard_cb:
+    tensorboard_cb_amount_of_episodes_for_mean: 100 # [episodes]
+    reset_tensorboard_iterations: False # [bool]
+  # Saving callback
+  saving_cb:
+    saving_cb_frequency: 2500 # [iterations]
+    number_of_inter_models_to_keep: -1 # -1=keep_all [iterations]
+    save_inter_replay_buffer: &save_inter_replay_buffer False # [bool]
+  # Eval callback
+  eval_cb:
+    eval_keys: ["ep_rew", "ep_length", "success", "height_diff", "goal_height_diff", "goal_area_dist", "in_goal_cells_changed", "out_goal_cells_changed", "in_goal_mean_diff", "out_goal_mean_diff"]
+    eval_cb_frequency: &eval_cb_frequency 2500 # [iterations]
+    eval_episodes: 25 # [episodes]
+    eval_best_model_success_threshold: 0.0 # [float] best model is only stored if success_rate >= threshold
+    save_inter_replay_buffer: *save_inter_replay_buffer
+
+######################################################################
+# Robosuite settings
+######################################################################
+# Specify environment
+robosuite:
+  env_id: "SandShaping"
+  robots: "UR5e"
+  gripper_types: "SandShapingGripperQuadratic"
+  hard_reset: False
+  render_camera: "null"
+  control_freq: 20
+  horizon: 40 # [iterations] Max. steps per episode
+  camera_names: &camera_names ["right"]
+  camera_widths: [&image_width 662]
+  camera_heights: [&image_height 376]
+  camera_depths: [True]
+  camera_segmentations: ["geom"]
+  # Config for pointcloud generation and heightmap reconstruction
+  camera_config:
+    camera_names: *camera_names
+    clip_ranges:
+      right: &clip_range [0.3,1.0]
+    segmentation_config:
+      sand_geom_id: 23
+      sand_cut_off_height: 0.09
+      crop_eef: True
+      crop_eef_inflation: 0.005
+    pointcloud_config:
+      preprocess_pointcloud: False
+      preprocess_config:
+        outlier_removal_mode: ["radius", "statistical"] # ["radius","statistical"]
+        nb_points: 8 # for "radius"
+        radius: 0.01 # for "radius"
+        nb_neighbors: 50 # for "statistical"
+        std_ratio: 7.0 # for "statistical"
+    reconstruct_heightmap_config:
+      point_to_cell_mapping: "min" # ["average", "min", "max"]
+      fill_tool_cells: null #"tool_values" # [float, "tool_values"]
+      fill_empty_cells: 0.0 # [float, "interpolation", "min_valid_height"]
+  controller_configs:
+    type: "OSC_POSITION"
+    input_max: 1
+    input_min: -1
+    output_max: [0.04, 0.04, 0.04] # Max [x, y, z] pos in m
+    output_min: [-0.04, -0.04, -0.04] # Min [x, y, z] pos in m
+    kp: 150
+    damping_ratio: 1
+    impedance_mode: "fixed"
+    kp_limits: [0, 300]
+    damping_ratio_limits: [0, 10]
+    position_limits: null
+    orientation_limits: null
+    uncouple_pos_ori: False
+    control_delta: True
+    interpolation: null
+    ramp_ratio: 0.2
+  early_termination: True
+  arena_config:
+    table_full_size: [&table_length 2.0, &table_width 0.8, 0.025]
+    table_friction: [1, 0.005, 0.0001]
+    table_offset: [0.2, 0.0, 0.72]
+    robot_offset: [0.0, 0.0, 0.0]
+    robot_ori_offset: [0.0,0.0,0.0]
+    mujoco_arena_origin: [0, 0, -0.72]
+    sand_box_offset: [-0.55, 0.0, 0.0]
+    has_legs: True
+    arena_name: "sand_shaping_arena"
+    mount_types: null
+  sand_sim_config:
+    grid_size: [60,30] # row,col = y,x
+    sand_box_dims: [&sand_box_length 0.15, &sand_box_width 0.3, 0.2, 0.01] # length/2, width/2, max_hfield_elevation, base_height
+    angle_of_repose: 30
+    init_height_in_mm: 60
+    height_perturbation_range_in_mm: 0
+    correct_render_config:
+      correct_render: False
+      fill_method: "griddata"
+      fill_threshold: 10.0
+    dataset_config:
+      goal_grid_size: [26,26] # row,col = y,x
+      observation_grid_size: [32,32] # row,col = y,x
+      id: [100, 106, 104, 105] # See dataset.yaml for mapping between id and names
+      dataset_selection: [[],[],[],[]]
+      equalize_datasets: False # Equalizes the chances of each dataset to be drawn
+      sample_strategy: "random_shift" # "random", "random_shift"
+      shift_max: 3
+  initial_gripper_pose_above_sand_bed: [0.0,0.0,0.02, 0.0,0.0,0.0] # x,y,z,r,p,y in m and deg
+  initial_gripper_pos_randomization: True # randomizes initial_gripper_pose_above_sand_bed within the sand bed dimensions
+  initial_gripper_randomization_range: [0.3, 0.3, 0.05] # z randomization range of [initial_gripper_pose_above_sand_bed[z], initial_gripper_randomization_height]
+  initial_gripper_randomization_angle: 0.0 # in radians, rotation randomization around z axis
+  initial_gripper_pos_in_goal: False
+  # Reward settings
+  reward_config:
+    normalize_reward: False # [bool]
+    reward_keys: 
+      delta_heightfield_difference:
+        type: "linear_greater"
+        magnitude: 5000.0
+        only_positive: False
+        clip_mean_diff: 1e-3
+        goal_mask: False
+        cut_off: True
+      gripper_to_goal_area_distance_mask_based:
+        type: "negative_tanh"
+        magnitude: 1.0
+        slope: 10.0
+        shrink_goal_area: 1
+        corner_dist: True
+      goal_area_reached_mask_based:
+        type: "scalar"
+        magnitude: 1.0
+        shrink_goal_area: 0
+      wrong_cell:
+        type: "linear_greater"
+        magnitude: 1000.0
+        clip_mean_diff: 1e-3
+        cut_off: False
+  termination_config:
+    terminate_on_table_contact: False
+    terminate_on_robot_joint_limit: False
+    terminate_on_success: False
+  success_config:
+    #
+  observations_config:
+    normalize_observations: True # [bool]
+    normalization_limits: [-1.0, 1.0]
+    flat_observations: False
+    # stack_observations: 4 # [int]
+    observation_keys:
+      eef_pos:
+        limits: &eef_pos_limits [[0.4,-0.3,0.0],[0.7,0.3,0.2]] # [[x_min,y_min,z_min],[x_max,y_max,z_max]]
+      eef_pos_prev:
+        limits: *eef_pos_limits
+      goal_mask:
+        limits: [0.0,1.0]
+        shrink_goal_area: 0
+      tool_mask:
+        limits: [0.0,1.0]
+      right_depth_seg: &right_depth_seg
+        limits: *clip_range
+    info_observation_keys: [camera]
+    goal_mask: False
+
+######################################################################
+# File handling
+######################################################################
+# # Settings used for file handling and logging (save/load destination etc)
+file_handling:
+  huggingface:
+    huggingface_project_name: "sand-gym"
+  wandb:
+    wandb_project_name: "sand_gym"
+  # Logging with Tensorboard and saving trained models
+  tensorboard:
+    tb_log_folder: "trained_models/tensorboard_logs"
+  trained_model:
+    # Saved models
+    save_model_folder: &save_model_folder "trained_models/rl_models"
+    # Loading of trained models
+    load_model_folder: *save_model_folder
+
+

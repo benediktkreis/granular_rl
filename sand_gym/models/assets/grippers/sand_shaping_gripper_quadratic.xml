@@ -1,0 +1,33 @@
+<mujoco model="sand_shaping_gripper">
+  <!--
+  <asset>
+    <mesh file="meshes/sand_shaping_gripper_mesh.stl" name="probe_mesh" scale="0.001 0.001 0.001"/>
+  </asset>
+  -->
+  <worldbody>
+      <body name="gripper_base" pos="0 0 0" quat="1 0 0 0">
+        <site name="ft_frame" pos="0 0 0"  size="0.01 0.01 0.01" rgba="1 0 0 1" type="sphere" group="1"/>
+        <!-- PLA rho=1210–1430kg/m3, ABS rho=1030-1070kg/m3 -->
+        <!-- V=0.000045m³, m = Vxrho = 0.000045m³x1300kg/m3 = 0.0585kg -->
+        <inertial pos="0 0 0.075" mass="0.0585" diaginertia="0.0001116375 0.0001116375 0.0000039" />
+        <geom name="gripper_col" type="box" pos="0 0 0.075" size="0.01 0.01 0.075" group="0"/>
+        <geom name="gripper_vis" type="box" pos="0 0 0.075" size="0.01 0.01 0.075" group="1" contype="0" conaffinity="0"/>
+        <geom name="gripper_interaction" type="box" pos="0 0 0.075" size="0.01 0.01 0.075" group="2"/>
+        <!--
+        <geom name="gripper_test" type="box" pos="0 0 0.075" size="0.005 0.015 0.075" group="2"/>
+        -->
+        <body name="eef" pos="0 0 0.15">
+            <site name="grip_site" pos="0 0 0" size="0.01 0.01 0.01" rgba="1 0 0 0.5" type="sphere" group="1"/>
+            <site name="ee_x" pos="0.1 0 0" size="0.005 .1"  quat="0.707105  0 0.707108 0 " rgba="1 0 0 0" type="cylinder" group="1"/>
+            <site name="ee_y" pos="0 0.1 0" size="0.005 .1" quat="0.707105 0.707108 0 0" rgba="0 1 0 0" type="cylinder" group="1"/>
+            <site name="ee_z" pos="0 0 0.1" size="0.005 .1" quat="1 0 0 0" rgba="0 0 1 0" type="cylinder" group="1"/>
+            <!-- This site was added for visualization. -->
+            <site name="grip_site_cylinder" pos="0 0 0" size="0.005 10" rgba="0 1 0 0.3" type="cylinder" group="1"/>
+          </body>    
+    </body>
+  </worldbody>
+  <sensor>
+        <force name="force_ee" site="ft_frame"/>
+        <torque name="torque_ee" site="ft_frame"/>
+    </sensor>
+</mujoco>

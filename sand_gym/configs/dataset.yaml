@@ -1,0 +1,65 @@
+######################################################################
+# Training settings
+######################################################################
+seed: 7
+
+######################################################################
+# Sand box settings
+######################################################################
+# grid_size: 64
+sand_box_dims: [&sand_box_length 0.16, *sand_box_length, 0.3, 0.01] # length/2, width/2, max_hfield_elevation, base_height
+
+######################################################################
+# Dataset settings
+######################################################################
+# Allocation of dataset id to names
+dataset_mapping:
+  100:
+    name: "rectangles"
+    depth_range: [5,20] # Rectangle depth in mm
+    width_range: [40,60] # Rectangle width in mm
+  104:
+    name: "deep_structure_small"
+    depth_range: [10,30] # Rectangle depth in mm
+    width_range: [75,100] # Rectangle width in mm
+    no_inner_polygons_range: [1,2]
+    inner_depth_step_range: [2,5]
+    polygon_points_range: [4,15] # Amount of polygon points
+    inner_polygon_scale_factor_range: [0.7,0.9]
+  105:
+    name: "fresco_negative"
+    embed_depth_mm: 5.0 # in mm
+    min_bb_limit: [0.04,0.04,0.005] # in m
+    max_bb_limit: [0.1,0.1,0.3] # in m
+  106:
+    name: "L"
+    depth_range: [5,20] # Rectangle depth in mm
+    width_range: [60,100] # Rectangle width in mm
+    thickness_range: [30,40] # Rectangle width in mm
+  200:
+    name: "test_rectangles"
+    depth_range: [5,20] # Rectangle depth in mm
+    width_range: [40,60] # Rectangle width in mm
+  204:
+    name: "test_deep_structure_small"
+    depth_range: [10,30] # Rectangle depth in mm
+    width_range: [75,100] # Rectangle width in mm
+    no_inner_polygons_range: [1,2]
+    inner_depth_step_range: [2,5]
+    polygon_points_range: [4,15] # Amount of polygon points
+    inner_polygon_scale_factor_range: [0.7,0.9]
+  205:
+    name: "test_fresco_negative"
+    embed_depth_mm: 5.0 # in mm
+    min_bb_limit: [0.04,0.04,0.005] # in m
+    max_bb_limit: [0.1,0.1,0.3] # in m
+  206:
+    name: "test_L"
+    depth_range: [5,20] # Rectangle depth in mm
+    width_range: [60,100] # Rectangle width in mm
+    thickness_range: [40,50] # Rectangle width in mm
+sand_sim_config:
+  grid_cell_size: 0.01 # in m
+  sand_range: 0.2 # in m
+  flow_rate: 0.125
+  unstable_cells_threshold: 0.001
